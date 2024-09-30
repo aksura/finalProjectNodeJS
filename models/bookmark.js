@@ -14,17 +14,19 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Bookmark.init({
-    bookmark_name: DataTypes.STRING,
-    userID: DataTypes.INTEGER,
-    movieID: DataTypes.INTEGER
+    userId: DataTypes.INTEGER,
+    movieId: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'Bookmark',
   });
 
-  /*Bookmark.associate = (models) => {
-    Bookmark.belongsTo(models.User, { foreignKey: 'user_id' });
-    Bookmark.belongsTo(models.Movie, { foreignKey: 'movie_id' });
-  };*/
+
+  Bookmark.associate = function (models) {
+    Bookmark.belongsTo(models.User, { foreignKey: 'userId' });
+    Bookmark.belongsTo(models.Movie, { foreignKey: 'movieId' });
+  };
+
+
   return Bookmark;
 };

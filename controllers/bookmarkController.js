@@ -1,9 +1,10 @@
 const { Bookmark } = require("../models");
+const { verify } = require("jsonwebtoken");
+const { User,Movie } = require("../models");
 
 exports.getBookmarks = async (req, res) => {
 
-    const { authorization } = req.headers;
-  console.log("Authorization : " + authorization);
+  const { authorization } = req.headers;
   try {
     if (!authorization) {
       throw new Error("Token not found");
@@ -15,8 +16,30 @@ exports.getBookmarks = async (req, res) => {
       throw new Error("Token not found");
     }
 
-    
-    res.status(200).json("statusGET:ok");
+    const decoded = verify(token, process.env.JWT_SECRET);
+
+    const user = await User.findOne({ where: { id: decoded.id } });
+
+    if (!user) throw new Error("User is not registered");
+    const userId = user.id;
+
+    try {
+      const bookmarks = await Bookmark.findAll({
+        where: { userId },
+        include: [{
+          model: Movie,
+          attributes: ['id', 'title', 'synopsis', /* other columns you want to fetch */]
+        }]
+      });
+
+      const movies = bookmarks.map(bookmark => bookmark.Movie);      
+      res.status(200).json(movies);
+
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
+
 
   } catch (error) {
     return res.status(401).json({
@@ -29,8 +52,8 @@ exports.getBookmarks = async (req, res) => {
 
 exports.postBookmark = async (req, res) => {
 
-    const { authorization } = req.headers;
-  console.log("Authorization : " + authorization);
+  const { authorization } = req.headers;
+  //console.log("Authorization postBookmark: " + authorization);
   try {
     if (!authorization) {
       throw new Error("Token not found");
@@ -41,8 +64,32 @@ exports.postBookmark = async (req, res) => {
     if (!token) {
       throw new Error("Token not found");
     }
+    const decoded = verify(token, process.env.JWT_SECRET);
+    const userId = decoded.id;
+    const user = await User.findOne({ where: { id: userId } });
+    console.log("User : " + user);
 
-    res.status(200).json("statusPOST:ok");
+    if (!user) throw new Error("User is not registered");
+
+    const movieId = req.params.id;
+
+    const movie = await Movie.findByPk(movieId);
+
+    if (!movie) throw new Error("Movie is not exist");
+
+    const title = movie.title;
+    const insertedBookmark = await Bookmark.create({
+      userId,
+      movieId
+    });
+
+    insertedBookmark.__factory = { autoIncrementField: 'id' }
+    var id = insertedBookmark.id;
+
+    res.status(200).json({
+      message: 'Success Adding New Bookmark',
+      id, userId, movieId, title
+    });
 
   } catch (error) {
     return res.status(401).json({

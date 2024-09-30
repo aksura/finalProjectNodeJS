@@ -6,9 +6,12 @@ const { Movie } = require('../models');
 
 const sampleBookmarks = [
     {
-        bookmark_name:"bk1",
-        userID: 1,
-        movieID: 1
+        userId: 1,
+        movieId: 1
+    },
+    {
+        userId: 1,
+        movieId: 3
     }
 ];
 
@@ -42,13 +45,18 @@ const sampleMovies = [
 beforeAll(async () => {
     await sequelize.sync({ force: true }); // This will drop and recreate the tables
 
+    sequelize.models = {};
+
     // Create dummy data
+    const user = await User.create({ user: 'nanda', username: 'nanda88', email: 'nanda3@gmail.com', password: 'okelah', role : 'user', phoneNumber : '081123456789', address : 'Jakarta Selatan' });
+    token = user.generateToken();
+
     await Movie.bulkCreate(sampleMovies);
     console.log('Sample movies have been added successfully.');
+
     await Bookmark.bulkCreate(sampleBookmarks);
     console.log('Sample bookmarks have been added successfully.');
-    const user = await User.create({ username: 'nanda3', email: 'nanda3@gmail.com', password: 'okelah' });
-    token = user.generateToken();
+
 });
 
 describe('GET Bookmarks [SUCCES CASE]', (done) => {
@@ -61,6 +69,7 @@ describe('GET Bookmarks [SUCCES CASE]', (done) => {
             .auth(token, { type: "bearer" })
             .send();
 
+        console.log(response.body);
         expect(response.status).toBe(200);
         expect(response.body).toBeInstanceOf(Array);
     });
@@ -76,8 +85,9 @@ describe('POST Bookmarks [SUCCES CASE]', (done) => {
             .auth(token, { type: "bearer" })
             .send();
 
+        console.log(response.body);
         expect(response.status).toBe(200);
-        expect(response.body).toBeInstanceOf(Array);
+        expect(response.body).toBeInstanceOf(Object);
     });
 })
 
@@ -97,7 +107,7 @@ describe('GET Bookmarks [ERROR CASE]', (done) => {
 
 describe('POST Bookmarks [ERROR CASE]', (done) => {
     // Kerjakan test disini
-    it("Should not be able to GET TODO", async () => {
+    it("Should not be able to POST Bookmark", async () => {
         const response = await request(app)
             .post("/bookmark/12")
             .set("Content-Type", "application/json")

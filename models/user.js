@@ -4,6 +4,7 @@ const { sign } = require("jsonwebtoken");
 const {
   Model
 } = require('sequelize');
+const { PassThrough } = require("supertest/lib/test");
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     /**
@@ -26,9 +27,14 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   User.init({
+    user: DataTypes.STRING,
     username: DataTypes.STRING,
     email: DataTypes.STRING,
-    password: DataTypes.STRING
+    password: DataTypes.STRING,
+    role: DataTypes.STRING,
+    phoneNumber: DataTypes.STRING,
+    address: DataTypes.STRING,
+    
   }, {
     sequelize,
     modelName: 'User',
@@ -39,10 +45,11 @@ module.exports = (sequelize, DataTypes) => {
     user.password = hashSync(user.password, salt);
   });
 
+  
   User.associate = (models) => {
-    User.hasMany(models.Bookmark, { foreignKey: 'userID' });
+    User.hasMany(models.Bookmark, { foreignKey: 'userId' });
   };
-
+  
   return User;
   
 };

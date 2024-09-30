@@ -9,13 +9,10 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      bookmark_name: {
-        type: Sequelize.STRING
-      },
-      userID: {
+      userId: {
         type: Sequelize.INTEGER
       },
-      movieID: {
+      movieId: {
         type: Sequelize.INTEGER
       },
       createdAt: {
