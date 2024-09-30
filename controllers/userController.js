@@ -1,14 +1,36 @@
 const { User } = require("../models");
+const { hash, genSalt } = require("bcrypt");
 
-exports.register = async (req, res) => {
+exports.register = async (req, res, next) => {
+
+    //console.log(req.body);
+    const { name, username, email, password, role, phoneNumber, address } = req.body;
+  
     try {
-        const user = await User.create(req.body);
-        res.status(201).json(user);
+      const salt = await genSalt(10);
+      const hashedPassword = await hash(password, salt);        
+      
+      const userInsert = await User.create({
+        name,
+        username,
+        email,
+        password: hashedPassword,
+        role,
+        phoneNumber,
+        address        
+      });
+
+      userInsert.__factory = { autoIncrementField: 'id' }
+      var id = userInsert.id;
+      
+      res.status(200).json({
+        message: 'Success Creating New User',
+        data: { id, name, username, email, role, phoneNumber, address }
+      });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+      next(error);
     }
-    //res.status(200).json({"Status" : "Under Construction"});
-};
+  };
 
 exports.login = async (req, res) => {
 

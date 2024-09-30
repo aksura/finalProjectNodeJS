@@ -48,7 +48,7 @@ beforeAll(async () => {
     sequelize.models = {};
 
     // Create dummy data
-    const user = await User.create({ user: 'nanda', username: 'nanda88', email: 'nanda3@gmail.com', password: 'okelah', role : 'user', phoneNumber : '081123456789', address : 'Jakarta Selatan' });
+    const user = await User.create({ user: 'nanda', username: 'nanda01', email: 'nanda01@gmail.com', password: 'okelah', role: 'user', phoneNumber: '081123456789', address: 'Jakarta Selatan' });
     token = user.generateToken();
 
     await Movie.bulkCreate(sampleMovies);
@@ -99,6 +99,7 @@ describe('GET Bookmarks [ERROR CASE]', (done) => {
             .set("Content-Type", "application/json")
             .send();
 
+        console.log(response.body);
         expect(response.statusCode).toBe(401);
         expect(response.body.error).toBe("Unauthenticated");
         expect(response.body.message).toBe("Token not found");
@@ -113,6 +114,7 @@ describe('POST Bookmarks [ERROR CASE]', (done) => {
             .set("Content-Type", "application/json")
             .send();
 
+        console.log(response.body);
         expect(response.statusCode).toBe(401);
         expect(response.body.error).toBe("Unauthenticated");
         expect(response.body.message).toBe("Token not found");
