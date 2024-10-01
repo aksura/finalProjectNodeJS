@@ -67,7 +67,6 @@ exports.postBookmark = async (req, res) => {
     const decoded = verify(token, process.env.JWT_SECRET);
     const userId = decoded.id;
     const user = await User.findOne({ where: { id: userId } });
-    console.log("User : " + user);
 
     if (!user) throw new Error("User is not registered");
 
@@ -91,6 +90,42 @@ exports.postBookmark = async (req, res) => {
       id, userId, movieId, title
     });
 
+  } catch (error) {
+    return res.status(401).json({
+      error: "Unauthenticated",
+      message: error.message,
+    });
+  }
+
+};
+
+exports.getMovies = async (req, res) => {
+
+  const { authorization } = req.headers;
+  //console.log("Authorization postBookmark: " + authorization);
+  try {
+    if (!authorization) {
+      throw new Error("Token not found");
+    }
+
+    const [type, token] = authorization.split(" ");
+
+    if (!token) {
+      throw new Error("Token not found");
+    }
+    const decoded = verify(token, process.env.JWT_SECRET);
+    const userId = decoded.id;
+    const user = await User.findOne({ where: { id: userId } });
+
+    if (!user) throw new Error("User is not registered");
+
+    try {
+      const movies = await Movie.findAll();
+      res.json(movies);
+    } catch (error) {
+      res.status(500).json({ error: 'An error occurred while fetching movies' });
+    }
+   
   } catch (error) {
     return res.status(401).json({
       error: "Unauthenticated",
